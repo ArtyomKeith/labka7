@@ -39,8 +39,13 @@ for country in selected_countries:
         
         # Проверяем, достаточно ли столбцов для выполнения melt
         if len(country_data.columns) > 1:
-            country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
-            filtered_data.append(country_data)
+            try:
+                country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
+                filtered_data.append(country_data)
+            except Exception as e:
+                st.error(f"Ошибка при обработке данных для страны {country}: {e}")
+        else:
+            st.warning(f"Недостаточно данных для страны {country}. Пропускаем.")
 
 # Объединяем данные всех выбранных стран
 if filtered_data:
