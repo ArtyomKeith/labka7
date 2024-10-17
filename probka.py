@@ -27,28 +27,19 @@ df_pandas['country'] = df_pandas['country'].replace(country_mapping)
 # Переименовываем столбец 'country' на 'Страна'
 df_pandas = df_pandas.rename(columns={'country': 'Страна'})
 
-# Инициализация состояния сессии
-if 'selected_countries' not in st.session_state:
-    st.session_state.selected_countries = df_pandas['Страна'].unique().tolist()  # Начальные страны
-
-if 'year_range' not in st.session_state:
-    st.session_state.year_range = (2014, 2017)  # Начальные значения для диапазона лет
-
-# Заголовок приложения
-st.title("Анализ продовольственной безопасности")
-
-# Интерактивный текст с пояснениями
-st.write("Этот инструмент позволяет визуализировать изменение продовольственной безопасности в выбранных странах. "
-         "Вы можете выбрать страны и диапазон лет для анализа.")
+# Вывод информации о данных
+st.write("### Информация о данных")
+st.write(f"Количество записей: {len(df_pandas)}")
+st.write("Столбцы данных:")
+st.write(df_pandas.columns.tolist())
 
 # Выбор стран для отображения
 countries = df_pandas['Страна'].unique().tolist()
-selected_countries = st.multiselect("Выберите страны для отображения:", countries, 
-                                     default=st.session_state.selected_countries)
+selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
 
 # Слайдер для выбора диапазона лет
 year_range = st.slider("Выберите диапазон лет:", min_value=int(df_pandas['year'].min()), 
-                        max_value=int(df_pandas['year'].max()), value=st.session_state.year_range)
+                        max_value=int(df_pandas['year'].max()), value=(2014, 2017))
 
 # Фильтруем данные по выбранным странам и диапазону лет
 filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
@@ -60,7 +51,7 @@ if not filtered_data.empty:
     st.write("График ниже показывает изменение модифицированной тяжести продовольственной безопасности по годам для выбранных стран.")
 
     # Настройка стиля
-    plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
+    plt.style.use('ggplot')  # Используем стиль ggplot
 
     # Настройка графика
     plt.figure(figsize=(12, 6))
@@ -87,26 +78,27 @@ if not filtered_data.empty:
     # Отображаем график в Streamlit
     st.pyplot(plt)
 
-    # Статистика
-    stats = filtered_data.groupby('Страна')['F_mod_sev_tot'].agg(['mean', 'min', 'max']).reset_index()
-    st.write("Статистика по модифицированной тяжести продовольственной безопасности:")
-    st.table(stats)
+    # График распределения значений модифицированной тяжести
+    plt.figure(figsize=(12, 6))
+    sns.histplot(filtered_data['F_mod_sev_tot'], bins=20, kde=True, color='orange')
+    plt.title('Распределение модифицированной тяжести продовольственной безопасности', fontsize=16)
+    plt.xlabel('Модерированная тяжесть', fontsize=12)
+    plt.ylabel('Частота', fontsize=12)
+    st.pyplot(plt)
 
-    # Добавляем интерактивные карточки с пояснениями
-    with st.expander("Что такое модифицированная тяжесть продовольственной безопасности?"):
-        st.write("Модифицированная тяжесть продовольственной безопасности — это мера, которая позволяет оценить, "
-                 "насколько население страдает от нехватки продовольствия. Чем ниже значение, тем лучше ситуация.")
-    
-    with st.expander("Пояснения к графику"):
-        st.write("График показывает, как меняется продовольственная безопасность в выбранных странах на протяжении выбранных лет. "
-                 "Вы можете использовать слайдер для изменения диапазона лет и выбора стран.")
-
-    # Кнопка для сброса фильтров
-    if st.button("Сбросить фильтры"):
-        st.session_state.selected_countries = countries  # Сброс к начальным странам
-        st.session_state.year_range = (2014, 2017)  # Сброс к начальному диапазону
-        st.session_state.selected_countries = df_pandas['Страна'].unique().tolist()  # Обновляем выбор стран
-        st.session_state.year_range = (2014, 2017)  # Обновляем диапазон лет
+    # Кнопка для загрузки данных
+    st.download_button(
+        label="Скачать данные в формате CSV",
+        data=filtered_data.to_csv(index=False).encode('utf-8'),
+        file_name='filtered_data.csv',
+        mime='text/csv',
+    )
 
 else:
     st.error("Не удалось получить данные для выбранных стран.")
+
+# Кнопка сброса фильтров
+if st.button("Сбросить фильтры"):
+    st.session_state.selected_countries = countries
+    st.session_state.year_range = (2014, 2017)
+    st.experimental_rerun()  # Перезапускаем скрипт, чтобы применить изменения
