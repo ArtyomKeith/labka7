@@ -3,12 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Изменяем фон приложения
+# Изменяем фон на оранжевый
 st.markdown(
     """
     <style>
     body {
-        background-color: #FF4B4B;  /* Цвет фона */
+        background-color: #FF5733;  /* Ярко-оранжевый цвет */
     }
     </style>
     """,
@@ -43,19 +43,11 @@ df_pandas = df_pandas.rename(columns={'country': 'Страна'})
 countries = df_pandas['Страна'].unique().tolist()
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
 
-# Слайдер для выбора диапазона лет
-year_range = st.slider("Выберите диапазон лет:", min_value=int(df_pandas['year'].min()), 
-                        max_value=int(df_pandas['year'].max()), value=(2014, 2017))
-
-# Фильтруем данные по выбранным странам и диапазону лет
-filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
-                           (df_pandas['year'].between(year_range[0], year_range[1]))]
+# Фильтруем данные по выбранным странам
+filtered_data = df_pandas[df_pandas['Страна'].isin(selected_countries)]
 
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
-    # Добавляем текстовое описание
-    st.write("График ниже показывает изменение модифицированной тяжести продовольственной безопасности по годам для выбранных стран.")
-
     # Настройка стиля
     plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
@@ -83,11 +75,5 @@ if not filtered_data.empty:
 
     # Отображаем график в Streamlit
     st.pyplot(plt)
-
-    # Статистика
-    stats = filtered_data.groupby('Страна')['F_mod_sev_tot'].agg(['mean', 'min', 'max']).reset_index()
-    st.write("Статистика по модифицированной тяжести продовольственной безопасности:")
-    st.table(stats)
-
 else:
     st.error("Не удалось получить данные для выбранных стран.")
