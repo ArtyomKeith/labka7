@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pydeck as pdk
 
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -27,12 +28,6 @@ df_pandas['country'] = df_pandas['country'].replace(country_mapping)
 # Переименовываем столбец 'country' на 'Страна'
 df_pandas = df_pandas.rename(columns={'country': 'Страна'})
 
-# Вывод информации о данных
-st.write("### Информация о данных")
-st.write(f"Количество записей: {len(df_pandas)}")
-st.write("Столбцы данных:")
-st.write(df_pandas.columns.tolist())
-
 # Выбор стран для отображения
 countries = df_pandas['Страна'].unique().tolist()
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
@@ -51,7 +46,7 @@ if not filtered_data.empty:
     st.write("График ниже показывает изменение модифицированной тяжести продовольственной безопасности по годам для выбранных стран.")
 
     # Настройка стиля
-    plt.style.use('ggplot')  # Используем стиль ggplot
+    plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
     # Настройка графика
     plt.figure(figsize=(12, 6))
@@ -78,27 +73,39 @@ if not filtered_data.empty:
     # Отображаем график в Streamlit
     st.pyplot(plt)
 
-    # График распределения значений модифицированной тяжести
-    plt.figure(figsize=(12, 6))
-    sns.histplot(filtered_data['F_mod_sev_tot'], bins=20, kde=True, color='orange')
-    plt.title('Распределение модифицированной тяжести продовольственной безопасности', fontsize=16)
-    plt.xlabel('Модерированная тяжесть', fontsize=12)
-    plt.ylabel('Частота', fontsize=12)
-    st.pyplot(plt)
+    # Интерактивные пояснения
+    with st.expander("Интерактивные пояснения"):
+        st.write("""
+            Модифицированная тяжесть продовольственной безопасности (F_mod_sev_tot) измеряет уровень
+            продовольственной безопасности для населения. На графике вы можете увидеть изменения 
+            этого показателя по странам и годам.
+        """)
 
-    # Кнопка для загрузки данных
-    st.download_button(
-        label="Скачать данные в формате CSV",
-        data=filtered_data.to_csv(index=False).encode('utf-8'),
-        file_name='filtered_data.csv',
-        mime='text/csv',
-    )
+    # Карта
+    st.write("Карта с расположением стран:")
+    map_data = pd.DataFrame({
+        'Страна': ['Казахстан', 'Кыргызстан', 'Таджикистан', 'Узбекистан'],
+        'Лат': [48.0196, 41.2044, 38.8610, 41.3775],
+        'Лон': [66.9237, 74.7661, 74.5698, 64.5850]
+    })
 
+    # Добавляем карту
+    st.pydeck_chart(pdk.Deck(
+        initial_view_state=pdk.ViewState(
+            latitude=39.5,
+            longitude=66.9,
+            zoom=3,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=map_data,
+                get_position='[Лон, Лат]',
+                get_color='[255, 0, 0]',
+                get_radius=50000,
+            ),
+        ],
+    ))
 else:
     st.error("Не удалось получить данные для выбранных стран.")
-
-# Кнопка сброса фильтров
-if st.button("Сбросить фильтры"):
-    st.session_state.selected_countries = countries
-    st.session_state.year_range = (2014, 2017)
-    st.experimental_rerun()  # Перезапускаем скрипт, чтобы применить изменения
