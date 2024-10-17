@@ -17,8 +17,8 @@ df_pandas['year'] = pd.to_numeric(df_pandas['year'])
 country_mapping = {
     'Kazakhstan': 'Казахстан',
     'KGZ': 'Кыргызстан',
-    'TAIJ': 'Таджикистан',  # исправлено сокращение
-    'UZB': 'Узбекистан'     # исправлено сокращение
+    'TAIJ': 'Таджикистан',
+    'UZB': 'Узбекистан'
 }
 
 # Заменяем названия стран в столбце 'country'
@@ -36,15 +36,31 @@ filtered_data = df_pandas[df_pandas['Страна'].isin(selected_countries)]
 
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
+    # Настройка стиля
+    plt.style.use('seaborn-darkgrid')  # Используем стиль seaborn
+    sns.set_palette('Set2')  # Красочная палитра
+
     # Настройка графика
     plt.figure(figsize=(12, 6))
-    sns.lineplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='Страна', marker='o')
+    sns.lineplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='Страна', marker='o', linewidth=2.5)
 
     # Настройка осей
-    plt.xticks(filtered_data['year'].unique(), rotation=45)
-    plt.title('Изменение продовольственной безопасности по годам для выбранных стран')
-    plt.xlabel('Год')
-    plt.ylabel('Модерированная тяжесть продовольственной безопасности')
+    plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
+    plt.yticks(fontsize=10)
+
+    # Добавляем заголовок и подписи к осям
+    plt.title('Изменение продовольственной безопасности по годам', fontsize=16, weight='bold', color='darkblue')
+    plt.xlabel('Год', fontsize=12, color='darkgreen')
+    plt.ylabel('Модерированная тяжесть продовольственной безопасности', fontsize=12, color='darkgreen')
+
+    # Настройка легенды
+    plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+
+    # Добавляем сетку
+    plt.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
+
+    # Добавляем подгонку макета
+    plt.tight_layout()
 
     # Отображаем график в Streamlit
     st.pyplot(plt)
