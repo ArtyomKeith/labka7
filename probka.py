@@ -3,18 +3,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Создание тестовых данных
-data = {
-    'year': ['2014', '2014', '2015', '2015', '2016', '2016', '2017', '2017'],
-    'country': ['Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан'],
-    'Модерированная тяжесть для всех': [0.1, 0.2, 0.15, 0.25, 0.2, 0.3, 0.25, 0.35]
-}
-
-df_pandas = pd.DataFrame(data)
+# Загрузка данных
+file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
+df_pandas = pd.read_excel(file_path)
 
 # Проверка загруженных данных
-st.write("Тестовые данные:")
-st.write(df_pandas)
+st.write("Исходные данные:")
+st.write(df_pandas.head())  # Отображаем первые 5 строк
+
+# Преобразуем данные
+df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлечение года
+df_pandas['country'] = df_pandas['country'].str[:-5]  # Извлечение названия страны
+
+# Проверка преобразованных данных
+st.write("Преобразованные данные:")
+st.write(df_pandas.head())
 
 # Настройка стиля графика
 plt.style.use('ggplot')
