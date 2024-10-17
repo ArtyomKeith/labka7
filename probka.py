@@ -37,8 +37,7 @@ filtered_data = df_pandas[df_pandas['Страна'].isin(selected_countries)]
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
     # Настройка стиля
-    plt.style.use('seaborn-darkgrid')  # Используем стиль seaborn
-    sns.set_palette('Set2')  # Красочная палитра
+    plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
     # Настройка графика
     plt.figure(figsize=(12, 6))
