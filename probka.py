@@ -105,7 +105,8 @@ if not filtered_data.empty:
     if st.button("Сбросить фильтры"):
         st.session_state.selected_countries = countries  # Сброс к начальным странам
         st.session_state.year_range = (2014, 2017)  # Сброс к начальному диапазону
-        st.experimental_rerun()  # Перезапускаем скрипт, чтобы применить изменения
+        st.session_state.selected_countries = df_pandas['Страна'].unique().tolist()  # Обновляем выбор стран
+        st.session_state.year_range = (2014, 2017)  # Обновляем диапазон лет
 
 else:
     st.error("Не удалось получить данные для выбранных стран.")
