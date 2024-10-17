@@ -24,18 +24,21 @@ country_mapping = {
 # Заменяем названия стран в столбце 'country'
 df_pandas['country'] = df_pandas['country'].replace(country_mapping)
 
+# Переименовываем столбец 'country' на 'Страна'
+df_pandas = df_pandas.rename(columns={'country': 'Страна'})
+
 # Выбор стран для отображения
-countries = df_pandas['country'].unique().tolist()
+countries = df_pandas['Страна'].unique().tolist()
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
 
 # Фильтруем данные по выбранным странам
-filtered_data = df_pandas[df_pandas['country'].isin(selected_countries)]
+filtered_data = df_pandas[df_pandas['Страна'].isin(selected_countries)]
 
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
     # Настройка графика
     plt.figure(figsize=(12, 6))
-    sns.lineplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='country', marker='o')
+    sns.lineplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='Страна', marker='o')
 
     # Настройка осей
     plt.xticks(filtered_data['year'].unique(), rotation=45)
