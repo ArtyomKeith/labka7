@@ -3,18 +3,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Создание тестовых данных
-data = {
-    'year': ['2014', '2014', '2015', '2015', '2016', '2016', '2017', '2017'],
-    'country': ['Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан', 'Казахстан', 'Кыргызстан'],
-    'Модерированная тяжесть для всех': [0.1, 0.2, 0.15, 0.25, 0.2, 0.3, 0.25, 0.35]
-}
+# Путь к вашему файлу
+file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
 
-df_pandas = pd.DataFrame(data)
+# Используем pandas для загрузки данных
+df_pandas = pd.read_excel(file_path)
 
 # Проверка загруженных данных
-st.write("Тестовые данные:")
-st.write(df_pandas)
+st.write("Загруженные данные:")
+st.write(df_pandas.head())
+
+# Убедитесь, что данные содержат все страны
+st.write("Уникальные значения в колонке country:")
+st.write(df_pandas['country'].unique())
 
 # Настройка стиля графика
 plt.style.use('ggplot')
