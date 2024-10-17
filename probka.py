@@ -21,21 +21,26 @@ st.write(df_pandas.columns.tolist())
 plt.style.use('ggplot')
 
 # Получаем список стран из названий столбцов
-countries = [col.split('_')[0] for col in df_pandas.columns if '_' in col]
-unique_countries = list(set(countries))
+countries = list(set(col.split('_')[0] for col in df_pandas.columns if '_' in col))
 
 # Выбор стран для отображения
-selected_countries = st.multiselect("Выберите страны для отображения:", unique_countries, default=unique_countries)
+selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
 
-# Фильтрация данных по выбранным странам
-filtered_columns = [col for col in df_pandas.columns if col.split('_')[0] in selected_countries]
-filtered_df = df_pandas[['year'] + filtered_columns]
+# Создаем новый DataFrame для выбранных стран
+filtered_data = []
 
-# Проверка наличия необходимых данных для построения графика
-if filtered_df.shape[1] > 1:
-    # Настройка графика
+for country in selected_countries:
+    country_data = df_pandas[['year', f'{country}_2014', f'{country}_2015', f'{country}_2016', f'{country}_2017']]
+    country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
+    filtered_data.append(country_data)
+
+# Объединяем данные всех выбранных стран
+if filtered_data:
+    final_df = pd.concat(filtered_data)
+
+    # Построение графика
     plt.figure(figsize=(12, 6))
-    filtered_df.set_index('year').T.plot()
+    sns.lineplot(data=final_df, x='year', y='F_mod_sev_tot', hue='country', dashes=False)
 
     # Убираем ненужные метки и выставляем года
     plt.xticks(rotation=45, fontsize=10)
@@ -52,4 +57,4 @@ if filtered_df.shape[1] > 1:
     # Отображение графика в Streamlit
     st.pyplot(plt)
 else:
-    st.error("Отсутствуют необходимые столбцы для построения графика.")
+    st.error("Выберите хотя бы одну страну для отображения.")
