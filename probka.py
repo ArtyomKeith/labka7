@@ -43,11 +43,19 @@ df_pandas = df_pandas.rename(columns={'country': 'Страна'})
 countries = df_pandas['Страна'].unique().tolist()
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
 
-# Фильтруем данные по выбранным странам
-filtered_data = df_pandas[df_pandas['Страна'].isin(selected_countries)]
+# Слайдер для выбора диапазона лет
+year_range = st.slider("Выберите диапазон лет:", min_value=int(df_pandas['year'].min()), 
+                        max_value=int(df_pandas['year'].max()), value=(2014, 2017))
+
+# Фильтруем данные по выбранным странам и диапазону лет
+filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
+                           (df_pandas['year'].between(year_range[0], year_range[1]))]
 
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
+    # Добавляем текстовое описание
+    st.write("График ниже показывает изменение модифицированной тяжести продовольственной безопасности по годам для выбранных стран.")
+
     # Настройка стиля
     plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
@@ -75,5 +83,17 @@ if not filtered_data.empty:
 
     # Отображаем график в Streamlit
     st.pyplot(plt)
+
+    # Статистика
+    stats = filtered_data.groupby('Страна')['F_mod_sev_tot'].agg(['mean', 'min', 'max']).reset_index()
+    st.write("Статистика по модифицированной тяжести продовольственной безопасности:")
+    st.table(stats)
+
+    # Добавим пояснение
+    st.write("### Пояснение:")
+    st.write("График показывает, как меняется продовольственная безопасность в выбранных странах на протяжении выбранных лет. "
+             "Чем ниже значение, тем лучше ситуация с продовольственной безопасностью. "
+             "Статистика в таблице предоставляет информацию о среднем, минимальном и максимальном значениях модифицированной тяжести.")
+
 else:
     st.error("Не удалось получить данные для выбранных стран.")
