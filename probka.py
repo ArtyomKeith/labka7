@@ -20,7 +20,7 @@ st.write(df_pandas.columns.tolist())
 # Настройка стиля графика
 plt.style.use('ggplot')
 
-# Получаем список стран из названий столбцов
+# Маппинг стран
 country_mapping = {
     'KGZ': 'Киргизстан',
     'UZB': 'Узбекистан',
@@ -28,10 +28,8 @@ country_mapping = {
     'TJK': 'Таджикистан'
 }
 
-countries = sorted(country_mapping.keys())
-
 # Выбор стран для отображения
-selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
+selected_countries = st.multiselect("Выберите страны для отображения:", list(country_mapping.keys()), default=list(country_mapping.keys()))
 
 # Проверяем, выбраны ли страны
 if not selected_countries:
@@ -41,31 +39,17 @@ else:
     filtered_data = []
 
     for country in selected_countries:
-        # Фильтрация столбцов по стране
-        country_columns = df_pandas.filter(like=country).columns.tolist()
+        # Фильтруем данные по стране и годам
+        country_data = df_pandas[df_pandas['country'] == country].copy()  # Предполагаем, что 'country' - это название страны
 
-        # Проверяем наличие данных
-        st.write(f"Выбраны столбцы для {country}: {country_columns}")
-        
-        # Проверяем, есть ли у нас данные для этой страны
-        if country_columns and 'year' in df_pandas.columns:
-            country_data = df_pandas[['year'] + country_columns]
-
-            # Проверяем, достаточно ли столбцов для выполнения melt
-            if len(country_data.columns) > 1:
-                try:
-                    # Переименовываем столбцы, чтобы избежать конфликта с value_name
-                    renamed_columns = {col: col.replace('_', ' ') for col in country_columns}
-                    country_data.rename(columns=renamed_columns, inplace=True)
-
-                    # Проводим melt
-                    melted_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
-
-                    # Заменяем коды стран на названия
-                    melted_data['country'] = melted_data['country'].apply(lambda x: country_mapping.get(x.split(' ')[0], x))
-                    filtered_data.append(melted_data)
-                except Exception as e:
-                    st.error(f"Ошибка при обработке данных для страны {country}: {e}")
+        # Проверяем, есть ли данные для этой страны
+        if not country_data.empty:
+            # Добавляем страну и соответствующие значения для годовых данных
+            melted_data = country_data[['year', 'F_mod_sev_tot']].copy()
+            melted_data['country'] = country_mapping[country]
+            filtered_data.append(melted_data)
+        else:
+            st.warning(f"Нет данных для {country}")
 
     # Объединяем данные всех выбранных стран
     if filtered_data:
