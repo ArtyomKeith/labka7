@@ -7,6 +7,10 @@ import seaborn as sns
 file_path = "aggregated_results.xlsx"  # Замените на ваш путь к файлу
 df_pandas = pd.read_excel(file_path)
 
+# Проверка загруженных данных
+st.write("Исходные данные:")
+st.write(df_pandas.head())
+
 # Преобразуем данные в длинный формат
 df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлечение года
 df_pandas['country'] = df_pandas['country'].str[:-5]  # Извлечение названия страны (удаление последних 5 символов)
@@ -19,7 +23,8 @@ df_pandas = df_pandas.rename(columns={
     'F_sev_tot': 'Серьезная тяжесть для всех',
 })
 
-# Проверка данных
+# Проверка преобразованных данных
+st.write("Преобразованные данные:")
 st.write(df_pandas.head())
 
 # Функция для объединения данных по годам и странам
@@ -29,6 +34,10 @@ def combine_data_all_countries(df):
 
 # Объединение данных
 df_combined = combine_data_all_countries(df_pandas)
+
+# Проверка объединенных данных
+st.write("Объединенные данные:")
+st.write(df_combined)
 
 # Настройка стиля графика
 plt.style.use('ggplot')
