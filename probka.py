@@ -30,9 +30,12 @@ selected_countries = st.multiselect("Выберите страны для ото
 filtered_data = []
 
 for country in selected_countries:
-    country_data = df_pandas[['year', f'{country}_2014', f'{country}_2015', f'{country}_2016', f'{country}_2017']]
-    country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
-    filtered_data.append(country_data)
+    # Фильтрация столбцов по стране
+    country_columns = df_pandas.filter(like=country).columns.tolist()
+    if len(country_columns) > 0:
+        country_data = df_pandas[['year'] + country_columns]
+        country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
+        filtered_data.append(country_data)
 
 # Объединяем данные всех выбранных стран
 if filtered_data:
