@@ -7,25 +7,13 @@ import seaborn as sns
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
 df_pandas = pd.read_excel(file_path)
 
-# Проверка загруженных данных
-st.write("Исходные данные:")
-st.write(df_pandas)
-
-# Проверка названий колонок
-st.write("Названия колонок:")
-st.write(df_pandas.columns)
-
 # Проверка на наличие значений
-st.write("Проверка значений:")
-st.write(df_pandas.describe())  # Основная статистика для количественных данных
+st.write("Проверка загруженных данных:")
+st.write(df_pandas.head())  # Выводим первые несколько строк для проверки
 
 # Преобразуем данные
 df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлечение года
 df_pandas['country'] = df_pandas['country'].str[:-5]  # Извлечение названия страны
-
-# Проверка преобразованных данных
-st.write("Преобразованные данные:")
-st.write(df_pandas)
 
 # Настройка стиля графика
 plt.style.use('ggplot')
