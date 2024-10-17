@@ -11,11 +11,26 @@ df_pandas = pd.read_excel(file_path)
 
 # Проверка загруженных данных
 st.write("Загруженные данные:")
-st.write(df_pandas.head())
+st.write(df_pandas)
+
+# Проверка названий столбцов
+st.write("Названия столбцов:")
+st.write(df_pandas.columns)
 
 # Убедитесь, что данные содержат все страны
 st.write("Уникальные значения в колонке country:")
 st.write(df_pandas['country'].unique())
+
+# Убедитесь, что в year нет пропусков
+st.write("Проверка на пропуски в столбце year:")
+st.write(df_pandas['year'].isnull().sum())
+
+# Убедитесь, что в Модерированная тяжесть для всех нет пропусков
+st.write("Проверка на пропуски в столбце 'Модерированная тяжесть для всех':")
+st.write(df_pandas['Модерированная тяжесть для всех'].isnull().sum())
+
+# Приводим year к строковому типу, если это необходимо
+df_pandas['year'] = df_pandas['year'].astype(str)
 
 # Настройка стиля графика
 plt.style.use('ggplot')
