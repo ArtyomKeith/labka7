@@ -29,7 +29,7 @@ def combine_data_all_countries(df):
 df_combined = combine_data_all_countries(df_pandas)
 
 # Настройка стиля графика
-plt.style.use('seaborn-darkgrid')
+plt.style.use('ggplot')  # Замените 'seaborn-darkgrid' на 'ggplot'
 
 # Визуализация для всех стран
 plt.figure(figsize=(12, 6))
