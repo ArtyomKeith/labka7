@@ -20,26 +20,28 @@ st.write(df_pandas.columns.tolist())
 # Настройка стиля графика
 plt.style.use('ggplot')
 
-# Создание столбца с годами из названия страны
-df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлекаем последние 4 символа для года
-df_pandas['country'] = df_pandas['country'].str[:-5]  # Убираем год из названия страны
+# Получаем список стран из названий столбцов
+countries = [col.split('_')[0] for col in df_pandas.columns if '_' in col]
+unique_countries = list(set(countries))
+
+# Выбор стран для отображения
+selected_countries = st.multiselect("Выберите страны для отображения:", unique_countries, default=unique_countries)
+
+# Фильтрация данных по выбранным странам
+filtered_columns = [col for col in df_pandas.columns if col.split('_')[0] in selected_countries]
+filtered_df = df_pandas[['year'] + filtered_columns]
 
 # Проверка наличия необходимых данных для построения графика
-if 'F_mod_sev_tot' in df_pandas.columns and 'country' in df_pandas.columns and 'year' in df_pandas.columns:
-    # Поворот датафрейма с использованием pivot_table для обработки дубликатов
-    df_pivot = df_pandas.pivot_table(index='year', columns='country', values='F_mod_sev_tot', aggfunc='mean')
-
-    # Визуализация для всех стран
+if filtered_df.shape[1] > 1:
+    # Настройка графика
     plt.figure(figsize=(12, 6))
-
-    # Построение графика
-    sns.lineplot(data=df_pivot)
+    filtered_df.set_index('year').T.plot()
 
     # Убираем ненужные метки и выставляем года
     plt.xticks(rotation=45, fontsize=10)
 
     # Добавляем заголовок и подписи
-    plt.title('Изменение продовольственной безопасности по годам для всех стран', fontsize=16)
+    plt.title('Изменение продовольственной безопасности по годам для выбранных стран', fontsize=16)
     plt.xlabel('Год', fontsize=12)
     plt.ylabel('Модерированная тяжесть продовольственной безопасности', fontsize=12)
 
