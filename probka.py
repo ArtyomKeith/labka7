@@ -17,8 +17,8 @@ df_pandas['year'] = pd.to_numeric(df_pandas['year'])
 country_mapping = {
     'Kazakhstan': 'Казахстан',
     'KGZ': 'Кыргызстан',
-    'TJK': 'Таджикистан',
-    'Uzbekistan': 'Узбекистан'
+    'TAIJ': 'Таджикистан',  # исправлено сокращение
+    'UZB': 'Узбекистан'     # исправлено сокращение
 }
 
 # Заменяем названия стран в столбце 'country'
