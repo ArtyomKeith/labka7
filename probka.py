@@ -27,6 +27,13 @@ df_pandas['country'] = df_pandas['country'].replace(country_mapping)
 # Переименовываем столбец 'country' на 'Страна'
 df_pandas = df_pandas.rename(columns={'country': 'Страна'})
 
+# Инициализация состояния сессии
+if 'selected_countries' not in st.session_state:
+    st.session_state.selected_countries = df_pandas['Страна'].unique().tolist()  # Начальные страны
+
+if 'year_range' not in st.session_state:
+    st.session_state.year_range = (2014, 2017)  # Начальные значения для диапазона лет
+
 # Заголовок приложения
 st.title("Анализ продовольственной безопасности")
 
@@ -36,12 +43,12 @@ st.write("Этот инструмент позволяет визуализир�
 
 # Выбор стран для отображения
 countries = df_pandas['Страна'].unique().tolist()
-default_countries = countries.copy()  # Сохраняем начальные страны
-selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=default_countries)
+selected_countries = st.multiselect("Выберите страны для отображения:", countries, 
+                                     default=st.session_state.selected_countries)
 
 # Слайдер для выбора диапазона лет
 year_range = st.slider("Выберите диапазон лет:", min_value=int(df_pandas['year'].min()), 
-                        max_value=int(df_pandas['year'].max()), value=(2014, 2017))
+                        max_value=int(df_pandas['year'].max()), value=st.session_state.year_range)
 
 # Фильтруем данные по выбранным странам и диапазону лет
 filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
@@ -96,8 +103,8 @@ if not filtered_data.empty:
 
     # Кнопка для сброса фильтров
     if st.button("Сбросить фильтры"):
-        selected_countries = default_countries
-        year_range = (2014, 2017)
+        st.session_state.selected_countries = countries  # Сброс к начальным странам
+        st.session_state.year_range = (2014, 2017)  # Сброс к начальному диапазону
         st.experimental_rerun()  # Перезапускаем скрипт, чтобы применить изменения
 
 else:
