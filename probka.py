@@ -7,17 +7,19 @@ import seaborn as sns
 file_path = "aggregated_results.xlsx"  # Замените на ваш путь к файлу
 df_pandas = pd.read_excel(file_path)
 
-# Переименовываем колонки на русский язык
-df_pandas.rename(columns={
+# Преобразуем данные в длинный формат
+df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлечение года
+df_pandas['country'] = df_pandas['country'].str[:-5]  # Извлечение названия страны (удаление последних 5 символов)
+df_pandas = df_pandas.rename(columns={
     'F_mod_sev_ad': 'Модерированная тяжесть для взрослых',
     'F_sev_ad': 'Серьезная тяжесть для взрослых',
     'F_mod_sev_child': 'Модерированная тяжесть для детей',
     'F_sev_child': 'Серьезная тяжесть для детей',
     'F_mod_sev_tot': 'Модерированная тяжесть для всех',
     'F_sev_tot': 'Серьезная тяжесть для всех',
-}, inplace=True)
+})
 
-# Проверка данных с новыми названиями колонок
+# Проверка данных
 st.write(df_pandas.head())
 
 # Функция для объединения данных по годам и странам
@@ -28,9 +30,6 @@ def combine_data_all_countries(df):
 # Объединение данных
 df_combined = combine_data_all_countries(df_pandas)
 
-# Пивотируем данные для построения графика
-df_pivot = df_combined.pivot(index='year', columns='country', values='Модерированная тяжесть для всех')
-
 # Настройка стиля графика
 plt.style.use('ggplot')
 
@@ -38,10 +37,10 @@ plt.style.use('ggplot')
 plt.figure(figsize=(12, 6))
 
 # Построение графика
-sns.lineplot(data=df_pivot, dashes=False)
+sns.lineplot(data=df_combined, x='year', y='Модерированная тяжесть для всех', hue='country', dashes=False)
 
 # Убираем ненужные метки и выставляем года
-plt.xticks(df_pivot.index, rotation=45, fontsize=10)
+plt.xticks(rotation=45, fontsize=10)
 
 # Добавляем заголовок и подписи
 plt.title('Изменение продовольственной безопасности по годам для всех стран', fontsize=16)
