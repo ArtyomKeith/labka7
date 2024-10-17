@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pydeck as pdk
+import io
 
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -92,6 +93,11 @@ if not filtered_data.empty:
         # Подгонка макета
         plt.tight_layout()
 
+        # Сохранение графика
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        st.image(buf, caption='Линейный график', use_column_width=True)
+
         # Отображаем линейный график в Streamlit
         st.pyplot(plt)
 
@@ -108,6 +114,11 @@ if not filtered_data.empty:
         plt.xticks(rotation=45, fontsize=10)
         plt.yticks(fontsize=10)
         plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+
+        # Сохранение графика
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        st.image(buf, caption='Столбчатая диаграмма', use_column_width=True)
 
         # Отображаем столбчатую диаграмму в Streamlit
         st.pyplot(plt)
