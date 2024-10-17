@@ -26,8 +26,8 @@ df_pandas['country'] = df_pandas['country'].str[:-5]  # Убираем год и
 
 # Проверка наличия необходимых данных для построения графика
 if 'F_mod_sev_tot' in df_pandas.columns and 'country' in df_pandas.columns and 'year' in df_pandas.columns:
-    # Поворот датафрейма для удобства визуализации
-    df_pivot = df_pandas.pivot(index='year', columns='country', values='F_mod_sev_tot')
+    # Поворот датафрейма с использованием pivot_table для обработки дубликатов
+    df_pivot = df_pandas.pivot_table(index='year', columns='country', values='F_mod_sev_tot', aggfunc='mean')
 
     # Визуализация для всех стран
     plt.figure(figsize=(12, 6))
