@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Путь к вашему файлу
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -13,18 +15,32 @@ st.write(df_pandas)
 
 # Проверка названий столбцов
 st.write("Названия столбцов:")
-st.write(df_pandas.columns.tolist())  # Вывод названий столбцов в виде списка
+st.write(df_pandas.columns.tolist())
 
-# Проверка наличия уникальных значений в столбце 'country'
-if 'country' in df_pandas.columns:
-    st.write("Уникальные значения в колонке country:")
-    st.write(df_pandas['country'].unique())
-else:
-    st.write("Столбца 'country' нет в данных.")
+# Настройка стиля графика
+plt.style.use('ggplot')
 
-# Проверка наличия столбца 'year'
-if 'year' in df_pandas.columns:
-    st.write("Уникальные значения в колонке year:")
-    st.write(df_pandas['year'].unique())
+# Визуализация для всех стран
+plt.figure(figsize=(12, 6))
+
+# Проверка наличия необходимых данных для построения графика
+if 'F_mod_sev_tot' in df_pandas.columns and 'country' in df_pandas.columns and 'year' in df_pandas.columns:
+    # Построение графика
+    sns.lineplot(data=df_pandas, x='year', y='F_mod_sev_tot', hue='country', dashes=False)
+
+    # Убираем ненужные метки и выставляем года
+    plt.xticks(rotation=45, fontsize=10)
+
+    # Добавляем заголовок и подписи
+    plt.title('Изменение продовольственной безопасности по годам для всех стран', fontsize=16)
+    plt.xlabel('Год', fontsize=12)
+    plt.ylabel('Модерированная тяжесть продовольственной безопасности', fontsize=12)
+
+    # Настройка для улучшения отображения легенды и подписей
+    plt.legend(title='Страны', fontsize=10, title_fontsize=12)
+    plt.tight_layout()  # Автоматическая подгонка графика
+
+    # Отображение графика в Streamlit
+    st.pyplot(plt)
 else:
-    st.write("Столбца 'year' нет в данных.")
+    st.error("Отсутствуют необходимые столбцы для построения графика.")
