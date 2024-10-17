@@ -17,6 +17,13 @@ st.write(df_pandas)
 st.write("Названия столбцов:")
 st.write(df_pandas.columns.tolist())
 
+# Проверка уникальных значений в столбце 'country'
+st.write("Уникальные значения в столбце 'country':")
+if 'country' in df_pandas.columns:
+    st.write(df_pandas['country'].unique())
+else:
+    st.error("Столбец 'country' не найден в данных!")
+
 # Настройка стиля графика
 plt.style.use('ggplot')
 
@@ -39,17 +46,19 @@ else:
     filtered_data = []
 
     for country in selected_countries:
-        # Фильтруем данные по стране и годам
-        country_data = df_pandas[df_pandas['country'] == country].copy()  # Предполагаем, что 'country' - это название страны
+        # Проверяем, есть ли данные для выбранной страны
+        if 'country' in df_pandas.columns:
+            country_data = df_pandas[df_pandas['country'] == country].copy()  # Предполагаем, что 'country' - это название страны
 
-        # Проверяем, есть ли данные для этой страны
-        if not country_data.empty:
-            # Добавляем страну и соответствующие значения для годовых данных
-            melted_data = country_data[['year', 'F_mod_sev_tot']].copy()
-            melted_data['country'] = country_mapping[country]
-            filtered_data.append(melted_data)
+            if not country_data.empty:
+                # Модифицируем данные
+                melted_data = country_data[['year', 'F_mod_sev_tot']].copy()
+                melted_data['country'] = country_mapping[country]
+                filtered_data.append(melted_data)
+            else:
+                st.warning(f"Нет данных для {country}")
         else:
-            st.warning(f"Нет данных для {country}")
+            st.error("Столбец 'country' отсутствует в данных!")
 
     # Объединяем данные всех выбранных стран
     if filtered_data:
