@@ -40,6 +40,9 @@ for country in selected_countries:
         # Проверяем, достаточно ли столбцов для выполнения melt
         if len(country_data.columns) > 1:
             try:
+                # Переименовываем столбцы, чтобы избежать конфликта с value_name
+                country_data = country_data.rename(columns={country_columns[0]: 'value_0', country_columns[1]: 'value_1',
+                                                            country_columns[2]: 'value_2', country_columns[3]: 'value_3'})
                 country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
                 filtered_data.append(country_data)
             except Exception as e:
