@@ -7,8 +7,11 @@ import seaborn as sns
 st.markdown(
     """
     <style>
-    body {
-        background-color: #FF5733;  /* Ярко-оранжевый цвет */
+    .reportview-container {
+        background: #FF5733;  /* Ярко-оранжевый цвет */
+    }
+    .sidebar .sidebar-content {
+        background: #FF5733;  /* Ярко-оранжевый цвет для сайдбара */
     }
     </style>
     """,
