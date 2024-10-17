@@ -21,7 +21,14 @@ st.write(df_pandas.columns.tolist())
 plt.style.use('ggplot')
 
 # Получаем список стран из названий столбцов
-countries = sorted(set(col.split('_')[0] for col in df_pandas.columns if '_' in col))
+country_mapping = {
+    'KGZ': 'Киргизстан',
+    'UZB': 'Узбекистан',
+    'KAZ': 'Казахстан',
+    'TJK': 'Таджикистан'
+}
+
+countries = sorted(country_mapping.keys())
 
 # Выбор стран для отображения
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
@@ -40,7 +47,7 @@ else:
         # Проверяем, есть ли у нас данные для этой страны
         if country_columns and 'year' in df_pandas.columns:
             country_data = df_pandas[['year'] + country_columns]
-            
+
             # Проверяем, достаточно ли столбцов для выполнения melt
             if len(country_data.columns) > 1:
                 try:
@@ -51,8 +58,8 @@ else:
                     # Проводим melt
                     melted_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
 
-                    # Добавляем страну в данные
-                    melted_data['country'] = country
+                    # Заменяем коды стран на названия
+                    melted_data['country'] = melted_data['country'].apply(lambda x: country_mapping.get(x.split('_')[0], x))
                     filtered_data.append(melted_data)
                 except Exception as e:
                     st.error(f"Ошибка при обработке данных для страны {country}: {e}")
