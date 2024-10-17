@@ -20,13 +20,20 @@ st.write(df_pandas.columns.tolist())
 # Настройка стиля графика
 plt.style.use('ggplot')
 
-# Визуализация для всех стран
-plt.figure(figsize=(12, 6))
+# Создание столбца с годами из названия страны
+df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлекаем последние 4 символа для года
+df_pandas['country'] = df_pandas['country'].str[:-5]  # Убираем год из названия страны
 
 # Проверка наличия необходимых данных для построения графика
 if 'F_mod_sev_tot' in df_pandas.columns and 'country' in df_pandas.columns and 'year' in df_pandas.columns:
+    # Поворот датафрейма для удобства визуализации
+    df_pivot = df_pandas.pivot(index='year', columns='country', values='F_mod_sev_tot')
+
+    # Визуализация для всех стран
+    plt.figure(figsize=(12, 6))
+
     # Построение графика
-    sns.lineplot(data=df_pandas, x='year', y='F_mod_sev_tot', hue='country', dashes=False)
+    sns.lineplot(data=df_pivot)
 
     # Убираем ненужные метки и выставляем года
     plt.xticks(rotation=45, fontsize=10)
