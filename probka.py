@@ -13,6 +13,17 @@ df_pandas[['country', 'year']] = df_pandas['year'].str.split('_', expand=True)
 # Преобразуем год в числовой формат
 df_pandas['year'] = pd.to_numeric(df_pandas['year'])
 
+# Словарь для замены стран на русские названия
+country_mapping = {
+    'Kazakhstan': 'Казахстан',
+    'KGZ': 'Кыргызстан',
+    'TJK': 'Таджикистан',
+    'Uzbekistan': 'Узбекистан'
+}
+
+# Заменяем названия стран в столбце 'country'
+df_pandas['country'] = df_pandas['country'].replace(country_mapping)
+
 # Выбор стран для отображения
 countries = df_pandas['country'].unique().tolist()
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
