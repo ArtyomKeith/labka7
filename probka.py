@@ -47,8 +47,13 @@ else:
 
     for country in selected_countries:
         # Проверяем, есть ли данные для выбранной страны
+        st.write(f"Проверяем данные для страны: {country}")
         if 'country' in df_pandas.columns:
-            country_data = df_pandas[df_pandas['country'] == country].copy()  # Предполагаем, что 'country' - это название страны
+            country_data = df_pandas[df_pandas['country'] == country].copy()  # Предполагаем, что 'country' - это код страны
+
+            # Выводим первые несколько строк данных для выбранной страны для проверки
+            st.write(f"Данные для страны {country}:")
+            st.write(country_data.head())
 
             if not country_data.empty:
                 # Модифицируем данные
