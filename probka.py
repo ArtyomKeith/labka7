@@ -36,9 +36,19 @@ selected_countries = st.multiselect("Выберите страны для ото
 year_range = st.slider("Выберите диапазон лет:", min_value=int(df_pandas['year'].min()), 
                         max_value=int(df_pandas['year'].max()), value=(2014, 2017))
 
+# Словарь для показателей и их русских названий
+metrics_mapping = {
+    'F_mod_sev_ad': 'Модифицированная тяжесть продовольственной безопасности среди взрослых',
+    'F_sev_ad': 'Тяжесть продовольственной безопасности среди взрослых',
+    'F_mod_sev_child': 'Модифицированная тяжесть продовольственной безопасности среди детей',
+    'F_sev_child': 'Тяжесть продовольственной безопасности среди детей',
+    'F_mod_sev_tot': 'Общая модифицированная тяжесть продовольственной безопасности',
+    'F_sev_tot': 'Общая тяжесть продовольственной безопасности'
+}
+
 # Выбор показателя
-metrics = ['F_mod_sev_ad', 'F_sev_ad', 'F_mod_sev_child', 'F_sev_child', 'F_mod_sev_tot', 'F_sev_tot']
-selected_metric = st.selectbox("Выберите показатель для визуализации:", metrics)
+metrics = list(metrics_mapping.keys())
+selected_metric = st.selectbox("Выберите показатель для визуализации:", metrics, format_func=lambda x: metrics_mapping[x])
 
 # Фильтруем данные по выбранным странам и диапазону лет
 filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
@@ -58,7 +68,7 @@ if not filtered_data.empty:
 
     # Линейный график
     with tab1:
-        st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(selected_metric))
+        st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
         plt.figure(figsize=(12, 6))
         sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5)
 
@@ -67,9 +77,9 @@ if not filtered_data.empty:
         plt.yticks(fontsize=10)
 
         # Добавляем заголовок и подписи к осям
-        plt.title('Изменение {} по годам'.format(selected_metric), fontsize=16, weight='bold', color='darkblue')
+        plt.title('Изменение {} по годам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
         plt.xlabel('Год', fontsize=12, color='darkgreen')
-        plt.ylabel(selected_metric, fontsize=12, color='darkgreen')
+        plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
 
         # Настройка легенды
         plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
@@ -85,14 +95,14 @@ if not filtered_data.empty:
 
     # Столбчатая диаграмма
     with tab2:
-        st.write("Столбчатая диаграмма для сравнения {} по странам.".format(selected_metric))
+        st.write("Столбчатая диаграмма для сравнения {} по странам.".format(metrics_mapping[selected_metric]))
         plt.figure(figsize=(12, 6))
         sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None)
         
         # Настройка осей
-        plt.title('Сравнение {} по странам'.format(selected_metric), fontsize=16, weight='bold', color='darkblue')
+        plt.title('Сравнение {} по странам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
         plt.xlabel('Год', fontsize=12, color='darkgreen')
-        plt.ylabel(selected_metric, fontsize=12, color='darkgreen')
+        plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
         plt.xticks(rotation=45, fontsize=10)
         plt.yticks(fontsize=10)
         plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
@@ -102,11 +112,8 @@ if not filtered_data.empty:
 
     # Интерактивные пояснения
     with st.expander("Интерактивные пояснения"):
-        st.write("""
-            Модифицированная тяжесть продовольственной безопасности (F_mod_sev_tot) измеряет уровень
-            продовольственной безопасности для населения. На графиках вы можете увидеть изменения 
-            этого показателя по странам и годам. Столбчатая диаграмма позволяет сравнить показатели 
-            между странами за выбранные годы.
+        st.write("""На графиках вы можете увидеть изменения выбранного показателя по странам и годам. 
+            Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
         """)
 
     # Карта
