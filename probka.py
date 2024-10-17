@@ -3,6 +3,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Изменяем фон приложения
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #f0f0f0;  /* Цвет фона */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
 df_pandas = pd.read_excel(file_path)
