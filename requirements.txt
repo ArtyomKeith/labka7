@@ -3,3 +3,4 @@ dask[dataframe]
 matplotlib
 seaborn
 streamlit
+openpyxl
