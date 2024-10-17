@@ -28,22 +28,25 @@ def combine_data_all_countries(df):
 # Объединение данных
 df_combined = combine_data_all_countries(df_pandas)
 
+# Пивотируем данные для построения графика
+df_pivot = df_combined.pivot(index='year', columns='country', values='Модерированная тяжесть для всех')
+
 # Настройка стиля графика
-plt.style.use('ggplot')  # Замените 'seaborn-darkgrid' на 'ggplot'
+plt.style.use('ggplot')
 
 # Визуализация для всех стран
 plt.figure(figsize=(12, 6))
 
-# Используем sns.lineplot для отображения всех стран с переименованными метками года
-sns.lineplot(data=df_combined, x='year', y='Модерированная тяжесть для всех', hue='country')
+# Построение графика
+sns.lineplot(data=df_pivot, dashes=False)
 
-# Убираем страну из оси X и оставляем только года
-plt.xticks(df_combined['year'].unique(), rotation=45, fontsize=10)
+# Убираем ненужные метки и выставляем года
+plt.xticks(df_pivot.index, rotation=45, fontsize=10)
 
 # Добавляем заголовок и подписи
-plt.title('Изменение продовольственной безопасности по годам для всех стран')
-plt.xlabel('Год')
-plt.ylabel('Модерированная тяжесть продовольственной безопасности')
+plt.title('Изменение продовольственной безопасности по годам для всех стран', fontsize=16)
+plt.xlabel('Год', fontsize=12)
+plt.ylabel('Модерированная тяжесть продовольственной безопасности', fontsize=12)
 
 # Настройка для улучшения отображения легенды и подписей
 plt.legend(title='Страны', fontsize=10, title_fontsize=12)
