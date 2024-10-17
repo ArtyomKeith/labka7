@@ -11,6 +11,10 @@ df_pandas = pd.read_excel(file_path)
 st.write("Исходные данные:")
 st.write(df_pandas.head())  # Отображаем первые 5 строк
 
+# Проверка названий колонок
+st.write("Названия колонок:")
+st.write(df_pandas.columns)
+
 # Преобразуем данные
 df_pandas['year'] = df_pandas['country'].str[-4:]  # Извлечение года
 df_pandas['country'] = df_pandas['country'].str[:-5]  # Извлечение названия страны
@@ -26,7 +30,8 @@ plt.style.use('ggplot')
 plt.figure(figsize=(12, 6))
 
 # Построение графика
-sns.lineplot(data=df_pandas, x='year', y='Модерированная тяжесть для всех', hue='country', dashes=False)
+# Замените 'Модерированная тяжесть для всех' на корректное название колонки
+sns.lineplot(data=df_pandas, x='year', y='F_mod_sev_tot', hue='country', dashes=False)  # Например, используем 'F_mod_sev_tot'
 
 # Убираем ненужные метки и выставляем года
 plt.xticks(rotation=45, fontsize=10)
