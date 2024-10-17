@@ -48,7 +48,7 @@ if not filtered_data.empty:
     # Настройка стиля
     plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
-    # Настройка графика
+    # Линейный график
     plt.figure(figsize=(12, 6))
     sns.lineplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='Страна', marker='o', linewidth=2.5)
 
@@ -70,15 +70,31 @@ if not filtered_data.empty:
     # Добавляем подгонку макета
     plt.tight_layout()
 
-    # Отображаем график в Streamlit
+    # Отображаем линейный график в Streamlit
+    st.pyplot(plt)
+
+    # Столбчатая диаграмма
+    plt.figure(figsize=(12, 6))
+    sns.barplot(data=filtered_data, x='year', y='F_mod_sev_tot', hue='Страна', ci=None)
+    
+    # Настройка осей
+    plt.title('Сравнение модифицированной тяжести продовольственной безопасности по странам', fontsize=16, weight='bold', color='darkblue')
+    plt.xlabel('Год', fontsize=12, color='darkgreen')
+    plt.ylabel('Модерированная тяжесть продовольственной безопасности', fontsize=12, color='darkgreen')
+    plt.xticks(rotation=45, fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+
+    # Отображаем столбчатую диаграмму в Streamlit
     st.pyplot(plt)
 
     # Интерактивные пояснения
     with st.expander("Интерактивные пояснения"):
         st.write("""
             Модифицированная тяжесть продовольственной безопасности (F_mod_sev_tot) измеряет уровень
-            продовольственной безопасности для населения. На графике вы можете увидеть изменения 
-            этого показателя по странам и годам.
+            продовольственной безопасности для населения. На графиках вы можете увидеть изменения 
+            этого показателя по странам и годам. Столбчатая диаграмма позволяет сравнить показатели 
+            между странами за выбранные годы.
         """)
 
     # Карта
