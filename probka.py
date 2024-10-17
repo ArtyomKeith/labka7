@@ -21,7 +21,7 @@ st.write(df_pandas.columns.tolist())
 plt.style.use('ggplot')
 
 # Получаем список стран из названий столбцов
-countries = list(set(col.split('_')[0] for col in df_pandas.columns if '_' in col))
+countries = sorted(set(col.split('_')[0] for col in df_pandas.columns if '_' in col))
 
 # Выбор стран для отображения
 selected_countries = st.multiselect("Выберите страны для отображения:", countries, default=countries)
@@ -40,15 +40,16 @@ for country in selected_countries:
         # Проверяем, достаточно ли столбцов для выполнения melt
         if len(country_data.columns) > 1:
             try:
-                # Переименовываем столбцы, чтобы избежать конфликта с value_name
-                country_data = country_data.rename(columns={country_columns[0]: 'value_0', country_columns[1]: 'value_1',
-                                                            country_columns[2]: 'value_2', country_columns[3]: 'value_3'})
-                country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
-                filtered_data.append(country_data)
+                # Проверяем, что все необходимые столбцы существуют
+                if all(col in country_data.columns for col in country_columns):
+                    country_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
+                    # Изменяем названия стран для удобства отображения
+                    country_data['country'] = country_data['country'].str.replace('_', ' ')
+                    filtered_data.append(country_data)
+                else:
+                    st.warning(f"Недостаточно данных для страны {country}. Пропускаем.")
             except Exception as e:
                 st.error(f"Ошибка при обработке данных для страны {country}: {e}")
-        else:
-            st.warning(f"Недостаточно данных для страны {country}. Пропускаем.")
 
 # Объединяем данные всех выбранных стран
 if filtered_data:
