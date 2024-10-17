@@ -44,6 +44,9 @@ else:
         # Фильтрация столбцов по стране
         country_columns = df_pandas.filter(like=country).columns.tolist()
 
+        # Проверяем наличие данных
+        st.write(f"Выбраны столбцы для {country}: {country_columns}")
+        
         # Проверяем, есть ли у нас данные для этой страны
         if country_columns and 'year' in df_pandas.columns:
             country_data = df_pandas[['year'] + country_columns]
@@ -59,7 +62,7 @@ else:
                     melted_data = country_data.melt(id_vars=['year'], var_name='country', value_name='F_mod_sev_tot')
 
                     # Заменяем коды стран на названия
-                    melted_data['country'] = melted_data['country'].apply(lambda x: country_mapping.get(x.split('_')[0], x))
+                    melted_data['country'] = melted_data['country'].apply(lambda x: country_mapping.get(x.split(' ')[0], x))
                     filtered_data.append(melted_data)
                 except Exception as e:
                     st.error(f"Ошибка при обработке данных для страны {country}: {e}")
