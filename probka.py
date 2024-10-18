@@ -119,7 +119,7 @@ if not filtered_data.empty:
 
             # Добавляем текстовые метки с средними значениями
             for country in selected_countries:
-                country_data = filtered_data[filtered_data['Стана'] == country]
+                country_data = filtered_data[filtered_data['Страна'] == country]
                 avg_value = country_data[selected_metric].mean()
                 plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
                          horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
