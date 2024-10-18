@@ -62,8 +62,11 @@ if not filtered_data.empty:
     stats.columns = ['Страна', 'Среднее', 'Минимум', 'Максимум']  # Русские названия столбцов
     st.write(stats)
 
-    # Выбор цветов для графиков
-    color_palette = st.color_picker("Выберите цвет графиков", "#1f77b4")
+    # Выбор цветов для каждой страны
+    color_mapping = {}
+    for country in selected_countries:
+        color = st.color_picker(f"Выберите цвет для {country}", "#1f77b4")
+        color_mapping[country] = color
 
     # Выбор типа графика
     plot_type = st.selectbox("Выберите тип графика:", ["Линейный", "Столбчатый"])
@@ -79,7 +82,14 @@ if not filtered_data.empty:
         if plot_type == "Линейный":
             st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
             plt.figure(figsize=(12, 6))
-            sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5, palette=[color_palette])
+            sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5, palette=color_mapping)
+
+            # Добавляем текстовые метки с средними значениями
+            for country in selected_countries:
+                country_data = filtered_data[filtered_data['Страна'] == country]
+                avg_value = country_data[selected_metric].mean()
+                plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
+                         horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
 
             # Настройка осей
             plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
@@ -105,7 +115,14 @@ if not filtered_data.empty:
         elif plot_type == "Столбчатый":
             st.write("Столбчатая диаграмма для сравнения {} по странам.".format(metrics_mapping[selected_metric]))
             plt.figure(figsize=(12, 6))
-            sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None, palette=[color_palette])
+            sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None, palette=color_mapping)
+
+            # Добавляем текстовые метки с средними значениями
+            for country in selected_countries:
+                country_data = filtered_data[filtered_data['Стана'] == country]
+                avg_value = country_data[selected_metric].mean()
+                plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
+                         horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
 
             # Настройка осей
             plt.title('Сравнение {} по странам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
