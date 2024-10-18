@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pydeck as pdk
+import io  # Для работы с буферами
 
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -62,11 +63,11 @@ if not filtered_data.empty:
     stats.columns = ['Страна', 'Среднее', 'Минимум', 'Максимум']  # Русские названия столбцов
     st.write(stats)
 
-    # Краткое описание выбранного показателя
-    st.write(f"**Описание показателя:** {metrics_mapping[selected_metric]} — этот показатель отражает уровень продовольственной безопасности в разных возрастных группах.")
+    # Настройка стиля
+    plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
     # Вкладки для графиков
-    tab1, tab2, tab3 = st.tabs(["Линейный график", "Столбчатая диаграмма", "Гистограмма"])
+    tab1, tab2 = st.tabs(["Линейный график", "Столбчатая диаграмма"])
 
     # Линейный график
     with tab1:
@@ -112,30 +113,11 @@ if not filtered_data.empty:
         # Отображаем столбчатую диаграмму в Streamlit
         st.pyplot(plt)
 
-    # Гистограмма распределения
-    with tab3:
-        st.write(f"Гистограмма распределения значений {metrics_mapping[selected_metric]}")
-        plt.figure(figsize=(12, 6))
-        sns.histplot(filtered_data[selected_metric], bins=20, kde=True, color='skyblue')
-
-        plt.title(f'Распределение {metrics_mapping[selected_metric]}', fontsize=16, weight='bold', color='darkblue')
-        plt.xlabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
-        plt.ylabel('Частота', fontsize=12, color='darkgreen')
-
-        st.pyplot(plt)
-
-    # Интерактивные пояснения
+    # Добавление интерактивных пояснений
     with st.expander("Интерактивные пояснения"):
         st.write("""На графиках вы можете увидеть изменения выбранного показателя по странам и годам. 
             Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
         """)
-
-    # Кнопка для загрузки данных
-    st.download_button(
-        label="Скачать данные в Excel",
-        data=filtered_data.to_excel(index=False),
-        file_name='filtered_data.xlsx'
-    )
 
     # Карта
     st.write("Карта с расположением стран:")
@@ -168,10 +150,18 @@ if not filtered_data.empty:
         },
     ))
 
-    # Форма обратной связи
-    with st.expander("Оставьте свой комментарий"):
-        feedback = st.text_area("Напишите свой отзыв или предложение:")
-        if st.button("Отправить отзыв"):
-            st.write("Спасибо за ваш комментарий!")
+    # Кнопка для скачивания данных в формате Excel
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        filtered_data.to_excel(writer, index=False)
+        writer.save()
+
+    st.download_button(
+        label="Скачать данные в Excel",
+        data=buffer.getvalue(),
+        file_name='filtered_data.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 else:
     st.error("Не удалось получить данные для выбранных стран.")
