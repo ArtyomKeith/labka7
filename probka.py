@@ -4,12 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pydeck as pdk
 
-# Загружаем данные через интерфейс
-uploaded_file = st.file_uploader("Загрузите файл Excel", type="xlsx")
-if uploaded_file:
-    df_pandas = pd.read_excel(uploaded_file)
-else:
-    st.stop()
+# Загружаем данные
+file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
+df_pandas = pd.read_excel(file_path)
 
 # Разделяем 'year' на страну и год
 df_pandas[['country', 'year']] = df_pandas['year'].str.split('_', expand=True)
@@ -65,67 +62,116 @@ if not filtered_data.empty:
     stats.columns = ['Страна', 'Среднее', 'Минимум', 'Максимум']  # Русские названия столбцов
     st.write(stats)
 
-    # Таблица с данными по выбранному показателю
-    st.dataframe(filtered_data[['Страна', 'year', selected_metric]])
-
-    # Настройка стиля
-    plt.style.use('ggplot')
+    # Краткое описание выбранного показателя
+    st.write(f"**Описание показателя:** {metrics_mapping[selected_metric]} — этот показатель отражает уровень продовольственной безопасности в разных возрастных группах.")
 
     # Вкладки для графиков
-    tab1, tab2 = st.tabs(["Линейный график", "Столбчатая диаграмма"])
+    tab1, tab2, tab3 = st.tabs(["Линейный график", "Столбчатая диаграмма", "Гистограмма"])
 
     # Линейный график
     with tab1:
-        st.write(f"График изменения {metrics_mapping[selected_metric]} по годам.")
+        st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
         plt.figure(figsize=(12, 6))
         sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5)
 
-        plt.title(f'Изменение {metrics_mapping[selected_metric]} по годам', fontsize=16, weight='bold', color='darkblue')
+        # Настройка осей
+        plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
+        plt.yticks(fontsize=10)
+
+        # Добавляем заголовок и подписи к осям
+        plt.title('Изменение {} по годам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
         plt.xlabel('Год', fontsize=12, color='darkgreen')
         plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
-        plt.grid(True, linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
+
+        # Настройка легенды
+        plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+
+        # Добавляем сетку
+        plt.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
+
+        # Подгонка макета
         plt.tight_layout()
+
+        # Отображаем линейный график в Streamlit
         st.pyplot(plt)
 
     # Столбчатая диаграмма
     with tab2:
-        st.write(f"Сравнение {metrics_mapping[selected_metric]} по странам.")
+        st.write("Столбчатая диаграмма для сравнения {} по странам.".format(metrics_mapping[selected_metric]))
         plt.figure(figsize=(12, 6))
         sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None)
-
-        plt.title(f'Сравнение {metrics_mapping[selected_metric]} по странам', fontsize=16, weight='bold', color='darkblue')
+        
+        # Настройка осей
+        plt.title('Сравнение {} по странам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
         plt.xlabel('Год', fontsize=12, color='darkgreen')
         plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
+        plt.xticks(rotation=45, fontsize=10)
+        plt.yticks(fontsize=10)
+        plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+
+        # Отображаем столбчатую диаграмму в Streamlit
         st.pyplot(plt)
 
-    # Карта с расположением стран
-    st.write("Интерактивная карта:")
+    # Гистограмма распределения
+    with tab3:
+        st.write(f"Гистограмма распределения значений {metrics_mapping[selected_metric]}")
+        plt.figure(figsize=(12, 6))
+        sns.histplot(filtered_data[selected_metric], bins=20, kde=True, color='skyblue')
+
+        plt.title(f'Распределение {metrics_mapping[selected_metric]}', fontsize=16, weight='bold', color='darkblue')
+        plt.xlabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
+        plt.ylabel('Частота', fontsize=12, color='darkgreen')
+
+        st.pyplot(plt)
+
+    # Интерактивные пояснения
+    with st.expander("Интерактивные пояснения"):
+        st.write("""На графиках вы можете увидеть изменения выбранного показателя по странам и годам. 
+            Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
+        """)
+
+    # Кнопка для загрузки данных
+    st.download_button(
+        label="Скачать данные в Excel",
+        data=filtered_data.to_excel(index=False),
+        file_name='filtered_data.xlsx'
+    )
+
+    # Карта
+    st.write("Карта с расположением стран:")
     map_data = pd.DataFrame({
         'Страна': ['Казахстан', 'Кыргызстан', 'Таджикистан', 'Узбекистан'],
         'Лат': [48.0196, 41.2044, 38.8610, 41.3775],
         'Лон': [66.9237, 74.7661, 74.5698, 64.5850]
     })
 
+    # Добавляем карту
     st.pydeck_chart(pdk.Deck(
-        initial_view_state=pdk.ViewState(latitude=39.5, longitude=66.9, zoom=3),
+        initial_view_state=pdk.ViewState(
+            latitude=39.5,
+            longitude=66.9,
+            zoom=3,
+            pitch=0,
+        ),
         layers=[
             pdk.Layer(
                 'ScatterplotLayer',
                 data=map_data,
                 get_position='[Лон, Лат]',
-                get_color='[200, 30, 0, 160]',
+                get_color='[255, 0, 0]',
                 get_radius=50000,
                 pickable=True,
             ),
         ],
-        tooltip={"text": "{Страна}\nКоординаты: [{Лат}, {Лон}]"}
+        tooltip={
+            "text": "{Страна}\n{Лат}, {Лон}"
+        },
     ))
 
-    # Интерактивные пояснения
-    with st.expander("Интерактивные пояснения"):
-        st.write(f"Этот график показывает изменения {metrics_mapping[selected_metric]} по странам и годам. Вы можете "
-                 f"видеть детализированную информацию, выбирая разные страны и годы.")
+    # Форма обратной связи
+    with st.expander("Оставьте свой комментарий"):
+        feedback = st.text_area("Напишите свой отзыв или предложение:")
+        if st.button("Отправить отзыв"):
+            st.write("Спасибо за ваш комментарий!")
 else:
     st.error("Не удалось получить данные для выбранных стран.")
