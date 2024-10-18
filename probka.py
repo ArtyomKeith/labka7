@@ -62,112 +62,91 @@ if not filtered_data.empty:
     stats.columns = ['Страна', 'Среднее', 'Минимум', 'Максимум']  # Русские названия столбцов
     st.write(stats)
 
-    # Выбор цветов для каждой страны
-    color_mapping = {}
-    for country in selected_countries:
-        color = st.color_picker(f"Выберите цвет для {country}", "#1f77b4")
-        color_mapping[country] = color
-
-    # Выбор типа графика
-    plot_type = st.selectbox("Выберите тип графика:", ["Линейный", "Столбчатый"])
-
     # Настройка стиля
     plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
 
     # Вкладки для графиков
-    tab1, tab2 = st.tabs(["График", "Карта"])
+    tab1, tab2 = st.tabs(["Линейный график", "Столбчатая диаграмма"])
 
-    # График
+    # Линейный график
     with tab1:
-        plt.clf()  # Очистка текущей фигуры
-        if plot_type == "Линейный":
-            st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
-            plt.figure(figsize=(12, 6))
-            sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5, palette=color_mapping)
+        st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
+        plt.figure(figsize=(12, 6))
+        sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5)
 
-            # Добавляем текстовые метки с средними значениями
-            for country in selected_countries:
-                country_data = filtered_data[filtered_data['Страна'] == country]
-                avg_value = country_data[selected_metric].mean()
-                plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
-                         horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
+        # Настройка осей
+        plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
+        plt.yticks(fontsize=10)
 
-            # Настройка осей
-            plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
-            plt.yticks(fontsize=10)
+        # Добавляем заголовок и подписи к осям
+        plt.title('Изменение {} по годам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
+        plt.xlabel('Год', fontsize=12, color='darkgreen')
+        plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
 
-            # Добавляем заголовок и подписи к осям
-            plt.title('Изменение {} по годам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
-            plt.xlabel('Год', fontsize=12, color='darkgreen')
-            plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
+        # Настройка легенды
+        plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
 
-            # Настройка легенды
-            plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
+        # Добавляем сетку
+        plt.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
 
-            # Добавляем сетку
-            plt.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray', alpha=0.7)
+        # Подгонка макета
+        plt.tight_layout()
 
-            # Подгонка макета
-            plt.tight_layout()
+        # Отображаем линейный график в Streamlit
+        st.pyplot(plt)
 
-            # Отображаем линейный график в Streamlit
-            st.pyplot(plt)
+    # Столбчатая диаграмма
+    with tab2:
+        st.write("Столбчатая диаграмма для сравнения {} по странам.".format(metrics_mapping[selected_metric]))
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None)
+        
+        # Настройка осей
+        plt.title('Сравнение {} по странам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
+        plt.xlabel('Год', fontsize=12, color='darkgreen')
+        plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
+        plt.xticks(rotation=45, fontsize=10)
+        plt.yticks(fontsize=10)
+        plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
 
-        elif plot_type == "Столбчатый":
-            st.write("Столбчатая диаграмма для сравнения {} по странам.".format(metrics_mapping[selected_metric]))
-            plt.figure(figsize=(12, 6))
-            sns.barplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', ci=None, palette=color_mapping)
+        # Отображаем столбчатую диаграмму в Streamlit
+        st.pyplot(plt)
 
-            # Добавляем текстовые метки с средними значениями
-            for country in selected_countries:
-                country_data = filtered_data[filtered_data['Стана'] == country]
-                avg_value = country_data[selected_metric].mean()
-                plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
-                         horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
-
-            # Настройка осей
-            plt.title('Сравнение {} по странам'.format(metrics_mapping[selected_metric]), fontsize=16, weight='bold', color='darkblue')
-            plt.xlabel('Год', fontsize=12, color='darkgreen')
-            plt.ylabel(metrics_mapping[selected_metric], fontsize=12, color='darkgreen')
-            plt.xticks(rotation=45, fontsize=10)
-            plt.yticks(fontsize=10)
-            plt.legend(title='Страна', fontsize=10, title_fontsize=12, loc='upper right')
-
-            # Отображаем столбчатую диаграмму в Streamlit
-            st.pyplot(plt)
-
-        plt.close()  # Закрытие текущей фигуры для предотвращения ошибок в будущем
+    # Интерактивные пояснения
+    with st.expander("Интерактивные пояснения"):
+        st.write("""На графиках вы можете увидеть изменения выбранного показателя по странам и годам. 
+            Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
+        """)
 
     # Карта
-    with tab2:
-        st.write("Карта с расположением стран:")
-        map_data = pd.DataFrame({
-            'Страна': ['Казахстан', 'Кыргызстан', 'Таджикистан', 'Узбекистан'],
-            'Лат': [48.0196, 41.2044, 38.8610, 41.3775],
-            'Лон': [66.9237, 74.7661, 74.5698, 64.5850]
-        })
+    st.write("Карта с расположением стран:")
+    map_data = pd.DataFrame({
+        'Страна': ['Казахстан', 'Кыргызстан', 'Таджикистан', 'Узбекистан'],
+        'Лат': [48.0196, 41.2044, 38.8610, 41.3775],
+        'Лон': [66.9237, 74.7661, 74.5698, 64.5850]
+    })
 
-        # Добавляем карту
-        st.pydeck_chart(pdk.Deck(
-            initial_view_state=pdk.ViewState(
-                latitude=39.5,
-                longitude=66.9,
-                zoom=3,
-                pitch=0,
+    # Добавляем карту
+    st.pydeck_chart(pdk.Deck(
+        initial_view_state=pdk.ViewState(
+            latitude=39.5,
+            longitude=66.9,
+            zoom=3,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=map_data,
+                get_position='[Лон, Лат]',
+                get_color='[255, 0, 0]',
+                get_radius=50000,
+                pickable=True,
             ),
-            layers=[
-                pdk.Layer(
-                    'ScatterplotLayer',
-                    data=map_data,
-                    get_position='[Лон, Лат]',
-                    get_color='[255, 0, 0]',
-                    get_radius=50000,
-                    pickable=True,
-                ),
-            ],
-            tooltip={
-                "text": "{Страна}\n{Лат}, {Лон}"
-            },
-        ))
+        ],
+        tooltip={
+            "text": "{Страна}\n{Лат}, {Лон}"
+        },
+    ))
 else:
     st.error("Не удалось получить данные для выбранных стран.")
