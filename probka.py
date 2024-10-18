@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pydeck as pdk
+from io import BytesIO
 
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -54,8 +55,22 @@ selected_metric = st.selectbox("Выберите показатель для в�
 filtered_data = df_pandas[(df_pandas['Страна'].isin(selected_countries)) & 
                            (df_pandas['year'].between(year_range[0], year_range[1]))]
 
+# Слайдер для фильтрации по значению показателя
+min_value, max_value = int(filtered_data[selected_metric].min()), int(filtered_data[selected_metric].max())
+selected_value_range = st.slider("Выберите диапазон значений показателя:", min_value, max_value, (min_value, max_value))
+
+# Фильтруем данные по значению показателя
+filtered_data = filtered_data[(filtered_data[selected_metric] >= selected_value_range[0]) & 
+                              (filtered_data[selected_metric] <= selected_value_range[1])]
+
 # Проверка, что данные не пустые после фильтрации
 if not filtered_data.empty:
+    # Выбор цветов для стран
+    country_colors = {}
+    for country in selected_countries:
+        color = st.color_picker(f"Выберите цвет для {country}", '#00f900')
+        country_colors[country] = color
+
     # Статистика
     st.write("Статистика по выбранным данным:")
     stats = filtered_data.groupby('Страна')[selected_metric].agg(['mean', 'min', 'max']).reset_index()
@@ -72,7 +87,9 @@ if not filtered_data.empty:
     with tab1:
         st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
         plt.figure(figsize=(12, 6))
-        sns.lineplot(data=filtered_data, x='year', y=selected_metric, hue='Страна', marker='o', linewidth=2.5)
+        for country in selected_countries:
+            country_data = filtered_data[filtered_data['Страна'] == country]
+            plt.plot(country_data['year'], country_data[selected_metric], label=country, marker='o', color=country_colors[country])
 
         # Настройка осей
         plt.xticks(filtered_data['year'].unique(), rotation=45, fontsize=10)
@@ -118,6 +135,18 @@ if not filtered_data.empty:
             Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
         """)
 
+    # Кнопка для загрузки данных в Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        filtered_data.to_excel(writer, index=False)
+        writer.save()
+    st.download_button(
+        label="Загрузить данные в Excel",
+        data=output.getvalue(),
+        file_name='filtered_data.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
     # Карта
     st.write("Карта с расположением стран:")
     map_data = pd.DataFrame({
@@ -148,5 +177,6 @@ if not filtered_data.empty:
             "text": "{Страна}\n{Лат}, {Лон}"
         },
     ))
+
 else:
     st.error("Не удалось получить данные для выбранных стран.")
