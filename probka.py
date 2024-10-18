@@ -79,6 +79,7 @@ if not filtered_data.empty:
 
     # График
     with tab1:
+        plt.clf()  # Очистка текущей фигуры
         if plot_type == "Линейный":
             st.write("График ниже показывает изменение {} по годам для выбранных стран.".format(metrics_mapping[selected_metric]))
             plt.figure(figsize=(12, 6))
@@ -119,7 +120,7 @@ if not filtered_data.empty:
 
             # Добавляем текстовые метки с средними значениями
             for country in selected_countries:
-                country_data = filtered_data[filtered_data['Страна'] == country]
+                country_data = filtered_data[filtered_data['Стана'] == country]
                 avg_value = country_data[selected_metric].mean()
                 plt.text(country_data['year'].max(), avg_value, f'{avg_value:.2f}', 
                          horizontalalignment='right', size='medium', color=color_mapping[country], weight='semibold')
@@ -134,6 +135,8 @@ if not filtered_data.empty:
 
             # Отображаем столбчатую диаграмму в Streamlit
             st.pyplot(plt)
+
+        plt.close()  # Закрытие текущей фигуры для предотвращения ошибок в будущем
 
     # Карта
     with tab2:
