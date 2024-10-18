@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pydeck as pdk
-import io  # Для работы с буферами
+import io
 
 # Загружаем данные
 file_path = "aggregated_results.xlsx"  # Укажите путь к вашему файлу
@@ -113,11 +113,21 @@ if not filtered_data.empty:
         # Отображаем столбчатую диаграмму в Streamlit
         st.pyplot(plt)
 
-    # Добавление интерактивных пояснений
+    # Интерактивные пояснения
     with st.expander("Интерактивные пояснения"):
         st.write("""На графиках вы можете увидеть изменения выбранного показателя по странам и годам. 
             Столбчатая диаграмма позволяет сравнить показатели между странами за выбранные годы.
         """)
+
+    # Экспорт данных в Excel
+    st.write("Экспортировать отфильтрованные данные в Excel:")
+    if st.button("Скачать данные в Excel"):
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            filtered_data.to_excel(writer, index=False, sheet_name='Данные')
+        
+        buffer.seek(0)  # Перемещаем указатель в начало буфера
+        st.download_button("Скачать", buffer, "filtered_data.xlsx")
 
     # Карта
     st.write("Карта с расположением стран:")
@@ -149,19 +159,5 @@ if not filtered_data.empty:
             "text": "{Страна}\n{Лат}, {Лон}"
         },
     ))
-
-    # Кнопка для скачивания данных в формате Excel
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        filtered_data.to_excel(writer, index=False)
-        writer.save()
-
-    st.download_button(
-        label="Скачать данные в Excel",
-        data=buffer.getvalue(),
-        file_name='filtered_data.xlsx',
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-
 else:
     st.error("Не удалось получить данные для выбранных стран.")
