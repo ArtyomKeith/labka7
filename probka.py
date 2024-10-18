@@ -43,7 +43,9 @@ metrics_mapping = {
     'F_mod_sev_child': 'Модиф. тяжесть прод. безоп. среди детей',
     'F_sev_child': 'Тяжесть прод. безоп. среди детей',
     'F_mod_sev_tot': 'Общая модифиц. тяжесть прод. безоп.',
-    'F_sev_tot': 'Общая тяжесть прод. безоп.'
+    'F_sev_tot': 'Общая тяжесть прод. безоп.',
+    'F_very_sev_ad': 'Очень тяжелая прод. безоп. среди взросл.',
+    'F_very_sev_child': 'Очень тяжелая прод. безоп. среди детей'  # Новый показатель
 }
 
 # Выбор показателя
@@ -61,6 +63,20 @@ if not filtered_data.empty:
     stats = filtered_data.groupby('Страна')[selected_metric].agg(['mean', 'min', 'max']).reset_index()
     stats.columns = ['Страна', 'Среднее', 'Минимум', 'Максимум']  # Русские названия столбцов
     st.write(stats)
+
+    # Экспорт данных
+    st.download_button(
+        label="Экспортировать данные в CSV",
+        data=stats.to_csv(index=False).encode('utf-8'),
+        file_name='stats.csv',
+        mime='text/csv'
+    )
+    st.download_button(
+        label="Экспортировать данные в Excel",
+        data=stats.to_excel(index=False, engine='openpyxl'),
+        file_name='stats.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
     # Настройка стиля
     plt.style.use('ggplot')  # Используем стиль ggplot, который встроен в Matplotlib
